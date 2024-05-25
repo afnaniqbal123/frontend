@@ -76,13 +76,17 @@
 // })();
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import App from '../App';
+import { render, screen } from '@testing-library/react';
+import App from '../App'; // Adjust the path as per your project structure
 
-test('renders welcome message', () => {
-  act(() => {
+describe('App Component', () => {
+  test('renders the component without crashing', () => {
     render(<App />);
+    // Example assertion: Check if a specific text or element is present
+    const headerElement = screen.getByText(/React Todo List/i);
+    expect(headerElement).toBeInTheDocument();
   });
-  const welcomeElement = screen.getByText(/React Todo List/i);
-  expect(welcomeElement).toBeInTheDocument();
+
+  // Add more test cases as needed
 });
+
