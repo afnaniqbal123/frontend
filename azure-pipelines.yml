@@ -15,7 +15,8 @@ steps:
   - script: |
       npm install  # Install dependencies
       npm run build  # Build the React application
-    displayName: 'Install dependencies and build'
+      npm test 
+    displayName: 'Install dependencies, build and test'
 
   - task: PublishBuildArtifacts@1
     inputs:
