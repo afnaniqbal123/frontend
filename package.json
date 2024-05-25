@@ -44,6 +44,9 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-syntax-jsx": "^7.24.6",
+    "@babel/preset-env": "^7.24.6",
+    "@babel/preset-react": "^7.24.6",
     "chai": "^5.1.1"
   }
 }
