@@ -75,18 +75,66 @@
 //   }
 // })();
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import App from '../App'; // Adjust the path as per your project structure
+// import React from 'react';
+// import { render, screen } from '@testing-library/react';
+// import App from '../App'; // Adjust the path as per your project structure
 
-describe('App Component', () => {
-  test('renders the component without crashing', () => {
-    render(<App />);
-    // Example assertion: Check if a specific text or element is present
-    const headerElement = screen.getByText(/React Todo List/i);
+// describe('App Component', () => {
+//   test('renders the component without crashing', () => {
+//     render(<App />);
+//     const headerElement = screen.getByText(/React Todo List/i);
+//     expect(headerElement).toBeInTheDocument();
+//   });
+// });
+
+// TodoList.test.js
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import TodoList from './TodoList';
+
+describe('TodoList Component', () => {
+  test('renders the TodoList component', () => {
+    render(<TodoList />);
+    const headerElement = screen.getByText(/Todo List/i);
     expect(headerElement).toBeInTheDocument();
   });
 
-  // Add more test cases as needed
+  test('adds a new todo item', () => {
+    render(<TodoList />);
+    const todoInput = screen.getByLabelText('Add Todo');
+    const addButton = screen.getByText('Add');
+
+    // Simulate user input and click to add a new todo
+    fireEvent.change(todoInput, { target: { value: 'Test Todo' } });
+    fireEvent.click(addButton);
+
+    // Check if the new todo item is added to the list
+    const newTodoElement = screen.getByText('Test Todo');
+    expect(newTodoElement).toBeInTheDocument();
+  });
+
+  test('toggles a todo item', () => {
+    render(<TodoList />);
+    const todoCheckbox = screen.getByRole('checkbox', { name: /Test Todo/i });
+
+    // Simulate clicking on the checkbox to toggle the todo item
+    fireEvent.click(todoCheckbox);
+
+    // Check if the todo item is toggled (completed)
+    expect(todoCheckbox).toBeChecked();
+  });
+
+  test('deletes a todo item', () => {
+    render(<TodoList />);
+    const deleteButton = screen.getByRole('button', { name: /Delete Todo/i });
+
+    // Simulate clicking on the delete button to delete the todo item
+    fireEvent.click(deleteButton);
+
+    // Check if the todo item is deleted from the list
+    const deletedTodoElement = screen.queryByText('Test Todo');
+    expect(deletedTodoElement).not.toBeInTheDocument();
+  });
 });
+
 
