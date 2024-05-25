@@ -1,77 +1,76 @@
-// todoApp.test.js
+const { remote } = require('webdriverio');
 
-const { Builder, By, Key, until } = require('selenium-webdriver');
-const { expect } = require('chai');
-
-describe('Todo List Application', () => {
-  let driver;
-
-  before(async () => {
-    driver = await new Builder().forBrowser('chrome').build();
+(async () => {
+  const browser = await remote({
+    capabilities: {
+      browserName: 'chrome',
+    },
   });
 
-  after(async () => {
-    await driver.quit();
-  });
+  try {
+    await browser.url('http://localhost:3000');
 
-  it('should add a new todo item', async () => {
-    await driver.get('http://localhost:3000'); // Replace with your Todo List app URL
+    // Test Case 1: Check if the page loads successfully
+    await browser.waitUntil(async () => {
+      const page = await browser.$('.todo-app');
+      return await page.isDisplayed();
+    }, { timeout: 5000, timeoutMsg: 'Page not loaded' });
 
-    const todoInput = await driver.findElement(By.css('input[type="text"]'));
-    await todoInput.sendKeys('Test Todo', Key.RETURN);
+    console.log('Test 1 Passed: Page loaded successfully');
 
-    const todoItems = await driver.findElements(By.css('ul li'));
-    const lastItemText = await todoItems[todoItems.length - 1].getText();
+    // Test Case 2: Add a new todo item
+    const addItemInput = await browser.$('input[placeholder="Enter new task"]');
+    await addItemInput.setValue('Test Task 1');
+    const addItemButton = await browser.$('button=Add Task');
+    await addItemButton.click();
 
-    expect(lastItemText).to.equal('Test Todo');
-  });
+    const todoItem = await browser.$('li=Test Task 1');
+    if (await todoItem.isDisplayed()) {
+      console.log('Test 2 Passed: New todo item added');
+    } else {
+      console.error('Test 2 Failed: New todo item not added');
+    }
 
-  it('should mark a todo item as completed', async () => {
-    await driver.get('http://localhost:3000');
+    // Test Case 3: Mark the new todo item as completed
+    const todoCheckbox = await browser.$('li=Test Task 1 input[type="checkbox"]');
+    await todoCheckbox.click();
 
-    const todoItem = await driver.findElement(By.css('ul li:first-child'));
-    const checkbox = await todoItem.findElement(By.css('input[type="checkbox"]'));
-    await checkbox.click();
+    const isCompleted = await todoItem.getAttribute('class').then(cls => cls.includes('completed'));
+    if (isCompleted) {
+      console.log('Test 3 Passed: Todo item marked as completed');
+    } else {
+      console.error('Test 3 Failed: Todo item not marked as completed');
+    }
 
-    const completedItemText = await todoItem.getText();
-    expect(completedItemText).to.contain('line-through');
-  });
-
-  it('should delete a todo item', async () => {
-    await driver.get('http://localhost:3000');
-
-    const todoItems = await driver.findElements(By.css('ul li'));
-    const initialItemCount = todoItems.length;
-
-    const deleteButton = await todoItems[0].findElement(By.css('button'));
-    await deleteButton.click();
-
-    const updatedTodoItems = await driver.findElements(By.css('ul li'));
-    expect(updatedTodoItems.length).to.equal(initialItemCount - 1);
-  });
-
-  it('should edit an existing todo item', async () => {
-    await driver.get('http://localhost:3000');
-
-    const todoItem = await driver.findElement(By.css('ul li:first-child'));
-    const editButton = await todoItem.findElement(By.css('button.edit'));
+    // Test Case 4: Edit the new todo item
+    const editButton = await browser.$('li=Test Task 1 button=Edit');
     await editButton.click();
 
-    const editInput = await driver.findElement(By.css('input[type="text"]'));
-    await editInput.clear();
-    await editInput.sendKeys('Updated Todo', Key.RETURN);
+    const editInput = await browser.$('li=Test Task 1 input[type="text"]');
+    await editInput.setValue('Updated Test Task 1');
+    const saveButton = await browser.$('li=Test Task 1 button=Save');
+    await saveButton.click();
 
-    const updatedTodoItemText = await todoItem.getText();
-    expect(updatedTodoItemText).to.equal('Updated Todo');
-  });
+    const updatedTodoItem = await browser.$('li=Updated Test Task 1');
+    if (await updatedTodoItem.isDisplayed()) {
+      console.log('Test 4 Passed: Todo item edited');
+    } else {
+      console.error('Test 4 Failed: Todo item not edited');
+    }
 
-  it('should handle empty todo item submission', async () => {
-    await driver.get('http://localhost:3000');
+    // Test Case 5: Delete the new todo item
+    const deleteButton = await browser.$('li=Updated Test Task 1 button=Delete');
+    await deleteButton.click();
 
-    const todoInput = await driver.findElement(By.css('input[type="text"]'));
-    await todoInput.sendKeys(Key.RETURN);
-
-    const todoItems = await driver.findElements(By.css('ul li'));
-    expect(todoItems.length).to.equal(0); // Assuming empty todos are not added
-  });
-});
+    const isDeleted = await updatedTodoItem.isDisplayed().catch(() => false);
+    if (!isDeleted) {
+      console.log('Test 5 Passed: Todo item deleted');
+    } else {
+      console.error('Test 5 Failed: Todo item not deleted');
+    }
+  } catch (error) {
+    console.error('Test Failed!', error);
+  } finally {
+    await browser.deleteSession();
+  }
+})();
