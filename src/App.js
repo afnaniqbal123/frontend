@@ -1,19 +1,13 @@
+// src/App.js
 import React from 'react';
-import TaskForm from './components/TaskForm';
-import TaskList from './components/TaskLists';
 import './App.css';
+import TodoList from './components/TodoList';
 
 const App = () => {
-  const handleTaskAdded = () => {
-    // Refresh task list after adding a new task
-    window.location.reload();
-  };
-
   return (
-    <div className="App">
-      <h1>Task Manager</h1>
-      <TaskForm onTaskAdded={handleTaskAdded} />
-      <TaskList />
+    <div className="container">
+      <h1>React Todo List</h1>
+      <TodoList />
     </div>
   );
 };
